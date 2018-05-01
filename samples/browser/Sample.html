@@ -194,7 +194,8 @@
             
             var files = document.getElementById('filePicker').files;
             if (!files.length) {
-                return SDK.CreateRecognizer(recognizerConfig, authentication);
+                return SDK.CreateRecognizerWithCustomAudioSource(recognizerConfig, authentication, 
+                    new SDK.MicAudioSource(new SDK.PcmRecorder(), null, "4f87810f7a4cf23a371cd436531ab0064e5c4bee96cd735f70a802c5753fe466"));
             } else {
                 return SDK.CreateRecognizerWithFileAudioSource(recognizerConfig, authentication, files[0]);
             }
@@ -266,6 +267,9 @@
 
     <!-- Browser Hooks -->
     <script>
+        navigator.mediaDevices.enumerateDevices().then(dev => console.log(dev));
+
+
         var startBtn, stopBtn, hypothesisDiv, phraseDiv, statusDiv;
         var key, languageOptions, formatOptions, recognitionMode, inputSource, filePicker;
         var SDK;

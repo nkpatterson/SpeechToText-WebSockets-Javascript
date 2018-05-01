@@ -36,6 +36,8 @@ export class MicAudioSource implements IAudioSource {
 
     private id: string;
 
+    private deviceId?: string;
+
     private events: EventSource<AudioSourceEvent>;
 
     private initializeDeferral: Deferred<boolean>;
@@ -46,8 +48,9 @@ export class MicAudioSource implements IAudioSource {
 
     private context: AudioContext;
 
-    public constructor(recorder: IRecorder, audioSourceId?: string) {
+    public constructor(recorder: IRecorder, audioSourceId?: string, deviceId?: string) {
         this.id = audioSourceId ? audioSourceId : CreateNoDashGuid();
+        this.deviceId = deviceId;
         this.events = new EventSource<AudioSourceEvent>();
         this.recorder = recorder;
     }
@@ -86,8 +89,12 @@ export class MicAudioSource implements IAudioSource {
         } else {
             const next = () => {
                 this.OnEvent(new AudioSourceInitializingEvent(this.id)); // no stream id
+                const constraints = this.deviceId != null
+                    ? { video: false, audio: { deviceId: { exact: this.deviceId }}}
+                    : { video: false, audio: true };
+
                 getUserMedia(
-                    { audio: true, video: false },
+                    constraints,
                     (mediaStream: MediaStream) => {
                         this.mediaStream = mediaStream;
                         this.OnEvent(new AudioSourceReadyEvent(this.id));
